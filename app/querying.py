@@ -50,7 +50,7 @@ def query_falcon_40b_instruct(prompt):
     return query_replicate(prompt, "joehoover/falcon-40b-instruct:7d58d6bddc53c23fa451c403b2b5373b1e0fa094e4e0d1b98c3d02931aa07173")
 
 def query_openai(prompt, model):
-    openai.api_key = "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" #openai API
+    openai.api_key = "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" #openai API key
     try:
         response = openai.ChatCompletion.create(
             model=model,
