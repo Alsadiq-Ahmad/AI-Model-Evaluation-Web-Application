@@ -8,7 +8,7 @@ import time
 client = replicate.Client(api_token="r8_E5rw9IjRQv7UKvaIBaqbbn76fTv0PCJ4U7gK3")
 
 def query_vector_db(user_query):
-    pc = Pinecone(api_key="6b677b06-9315-4675-9d94-090f47b4ee9b")
+    pc = Pinecone(api_key="6b677b06-9315-4675-9d94-090f47b4ee9b") #Pinecone API
 
     if 'pwc' not in pc.list_indexes().names():
         pc.create_index(
@@ -50,7 +50,7 @@ def query_falcon_40b_instruct(prompt):
     return query_replicate(prompt, "joehoover/falcon-40b-instruct:7d58d6bddc53c23fa451c403b2b5373b1e0fa094e4e0d1b98c3d02931aa07173")
 
 def query_openai(prompt, model):
-    openai.api_key = "sk-proj-2fO9NG60B4k6ULfSwCJkT3BlbkFJQJ2OHS944xEQI6iwANuK"
+    openai.api_key = "sk-proj-2fO9NG60B4k6ULfSwCJkT3BlbkFJQJ2OHS944xEQI6iwANuK" #openai API
     try:
         response = openai.ChatCompletion.create(
             model=model,
