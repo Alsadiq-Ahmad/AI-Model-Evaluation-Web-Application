@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Model Evaluation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20210408/pngtree-white-abstract-vector-web-background-design-image_597636.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        h1 {
+            color: #4a4a4a;
+            margin-top: 30px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        input[type="text"] {
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 8px 0 0 8px;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        button {
+            padding: 15px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #response {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow-y: initial;
+            height: auto; /* Adjust height to auto */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        th#model-column, td#model-column {
+            width: 150px; /* Fixed width for Model column */
+        }
+
+        th#response-column, td#response-column {
+            width: calc(100% - 150px); /* Adjust width for Response column */
+        }
+
+        footer {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            width: 100%;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            input[type="text"] {
+                font-size: 16px;
+            }
+
+            button {
+                font-size: 16px;
+                padding: 10px 15px;
+            }
+
+            th#model-column, td#model-column {
+                width: 100px; /* Adjust fixed width for Model column on smaller screens */
+            }
+
+            th#response-column, td#response-column {
+                width: calc(100% - 100px); /* Adjust width for Response column on smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Model Evaluation</h1>
+    <form id="query-form">
+        <input type="text" id="query" name="query" placeholder="Enter your query">
+        <button type="submit">Submit</button>
+    </form>
+    <div id="response">
+        <table id="response-table">
+            <thead>
+                <tr>
+                    <th id="model-column">Model</th>
+                    <th id="response-column">Response</th>
+                </tr>
+            </thead>
+            <tbody id="response-list">
+                <!-- Responses will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+    <footer>Developed by Ahmad Alsadiq</footer>
+    <script>
+        document.getElementById('query-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = document.getElementById('query').value;
+            fetch('/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query })
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        const eventSource = new EventSource('/stream');
+
+        eventSource.addEventListener('response', function(event) {
+            const data = JSON.parse(event.data);
+            const responseList = document.getElementById('response-list');
+            const row = document.createElement('tr');
+
+            const modelCell = document.createElement('td');
+            modelCell.id = 'model-column';
+            modelCell.innerText = data.model;
+            row.appendChild(modelCell);
+
+            const responseCell = document.createElement('td');
+            responseCell.id = 'response-column';
+            responseCell.innerHTML = formatResponse(data.response); // Apply formatting
+            row.appendChild(responseCell);
+
+            responseList.appendChild(row);
+        });
+
+        function formatResponse(text) {
+            // Split lines and format bullet points and numbered lists
+            const lines = text.split('\n');
+            const formattedLines = lines.map(line => {
+                if (line.trim().startsWith('-') || line.trim().match(/^\d+\./)) {
+                    return `<li>${line.trim()}</li>`;
+                }
+                return `<p>${line.trim()}</p>`;
+            });
+            return formattedLines.join('');
+        }
+    </script>
+</body>
+</html>
