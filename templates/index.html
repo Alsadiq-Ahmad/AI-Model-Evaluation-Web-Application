@@ -132,7 +132,7 @@
 <body>
     <h1>Model Evaluation</h1>
     <form id="query-form">
-        <input type="text" id="query" name="query" placeholder="Enter your query">
+        <input type="text" id="query" name="query" placeholder="Enter your query" required>
         <button type="submit">Submit</button>
     </form>
     <div id="response">
@@ -151,7 +151,7 @@
     <footer>Developed by Ahmad Alsadiq</footer>
     <script>
         document.getElementById('query-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+            event.preventDefault(); //explain?
             const query = document.getElementById('query').value;
             fetch('/submit', {
                 method: 'POST',

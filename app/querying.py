@@ -2,18 +2,18 @@ import openai
 import replicate
 from pinecone import Pinecone, ServerlessSpec
 from openai.error import RateLimitError
-import time
+
 
 # Initialize the Replicate client with the API token
-client = replicate.Client(api_token="r8_Ph52reP35mATJOVWL0pRX8BqY4Fdnl74Kwt4Q")
+client = replicate.Client(api_token="")
 
 def query_vector_db(user_query):
-    pc = Pinecone(api_key="6b677b06-9315-4675-9d94-090f47b4ee9b") #Pinecone API
+    pc = Pinecone(api_key="") #Pinecone API
 
     if 'pwc' not in pc.list_indexes().names():
         pc.create_index(
             name='pwc',
-            dimension=1536,
+            dimension=1536,#number of element in each vector 
             metric='euclidean',
             spec=ServerlessSpec(
                 cloud='aws',
@@ -25,18 +25,17 @@ def query_vector_db(user_query):
     search_results = index.query(vector=[query_vector], top_k=5)
     return search_results
 
-def get_query_vector(query):
-    # Transform user query into a vector (dummy implementation)
+def get_query_vector(query):#transform query to vector
     return [0.0] * 512
 
 def create_prompts(user_query, search_results):
     return {
-        'gpt-3.5-turbo': f"{search_results} {user_query}",
+        'gpt-3.5-turbo': f"{search_results} {user_query}", #why we put f"{...}"
         'gpt-4': f"{search_results} {user_query}",
         'llama-2-70b-chat': f"{search_results} {user_query}",
         'falcon-40b-instruct': f"{search_results} {user_query}"
     }
-
+    
 def query_gpt_3_5_turbo(prompt):
     return query_openai(prompt, "gpt-3.5-turbo")
 
@@ -50,9 +49,9 @@ def query_falcon_40b_instruct(prompt):
     return query_replicate(prompt, "joehoover/falcon-40b-instruct:7d58d6bddc53c23fa451c403b2b5373b1e0fa094e4e0d1b98c3d02931aa07173")
 
 def query_openai(prompt, model):
-    openai.api_key = "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" #openai API key
+    openai.api_key = "" #openai API key
     try:
-        response = openai.ChatCompletion.create(
+        response = openai.ChatCompletion.create( 
             model=model,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
