@@ -1,8 +1,20 @@
 from flask import Flask, request, jsonify, render_template
 from flask_sse import sse
 from app import app
-from app.querying import query_models, query_vector_db, create_prompts, query_gpt_3_5_turbo, query_gpt_4, query_llama_2_70b_chat, query_falcon_40b_instruct
-import concurrent.futures #Execute tasks asynchronously
+from app.querying import (
+    query_models,
+    query_vector_db,
+    create_prompts,
+    query_gpt_3_5_turbo,
+    query_gpt_4,
+    query_llama_2_70b_chat,
+    query_falcon_40b_instruct,
+)
+import concurrent.futures  # Execute tasks asynchronously
+
+# Create a single ThreadPoolExecutor for the application lifetime so that
+# background tasks can run without blocking the request handler.
+executor = concurrent.futures.ThreadPoolExecutor()
 
 @app.route('/')
 def index():
@@ -33,8 +45,10 @@ def submit():
         ('falcon-40b-instruct', prompts['falcon-40b-instruct'])
     ]
 
-    with concurrent.futures.ThreadPoolExecutor() as executor: #Execute the send_responses function asynchronously for each model-prompt pair.
-        futures = [executor.submit(send_responses, model, prompt) for model, prompt in models_prompts]
+    # Submit tasks to the global executor without waiting for them to finish so
+    # that the HTTP response can be returned immediately.
+    for model, prompt in models_prompts:
+        executor.submit(send_responses, model, prompt)
 
     return jsonify({"status": "processing"})
 
